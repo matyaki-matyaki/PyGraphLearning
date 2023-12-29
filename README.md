@@ -66,3 +66,6 @@ This project is based on the following papers:
 
 - SGL: [[Kalofolias, 2016]](https://proceedings.mlr.press/v51/kalofolias16.html)
 - TVGL: [[Yamada+, 2019]](https://ieeexplore.ieee.org/abstract/document/8682762)
+
+## License
+MIT
