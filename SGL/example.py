@@ -5,10 +5,10 @@ from learn import sgl
 from static_graph import StaticErdosRenyiGraph
 
 N = 100 # number of nodes
-K = 10000 # number of data observed at each node
+K = 1000 # number of data observed at each node
 
 G = StaticErdosRenyiGraph(N) # ground-truth graph (random graph)
-X = G.generate_graph_signal(K) # observed data matrix
+X = G.generate_graph_signals(K) # observed data matrix
 
 # conduct static graph learning
 W = sgl(X, beta=1e-3)

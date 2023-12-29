@@ -4,12 +4,12 @@ import networkx as nx
 
 class StaticGraph:
     """
-    静的グラフのクラス
+    Class for static graphs
     
     Attributes
     ----------
     N: int
-        頂点数
+        Number of vertices
     """
     def __init__(self, N):
         self.N = N
@@ -18,20 +18,20 @@ class StaticGraph:
 
 class StaticErdosRenyiGraph(StaticGraph):
     """
-    静的ErdosRenyiグラフのクラス
+    Class for static Erdos-Renyi graphs
 
     Attributes
     ----------
     N: int
-        頂点数
+        Number of vertices
     p: float
-        頂点間に辺が貼られる確率
+        Probability of an edge being present between two vertices
     seed: int
-        乱数シード値
+        Random seed value
     random_state: np.random.RandomState
-        RandomState
+        RandomState instance
     W : np.ndarray
-        隣接行列\in\mathbb{R}^{N\times N}
+        Adjacency matrix \in \mathbb{R}^{N\times N}
     """
     def __init__(self, N, p=0.05, seed=42):
         super().__init__(N)
@@ -42,12 +42,12 @@ class StaticErdosRenyiGraph(StaticGraph):
     
     def _simulate(self) -> np.ndarray:
         """
-        ErdosRenyiグラフモデルに従って重み付き隣接行列を生成
+        Generate a weighted adjacency matrix following the Erdos-Renyi graph model
 
         Returns
         -------
         np.ndarray
-            隣接行列
+            Adjacency matrix
         """
         G = nx.fast_gnp_random_graph(self.N, self.p, seed=self.seed)
         for u, v in G.edges():
@@ -55,20 +55,21 @@ class StaticErdosRenyiGraph(StaticGraph):
         W = nx.to_numpy_array(G)
         return W
     
-    def generate_graph_signal(self, K: int, sigma: float=0.5) -> np.ndarray:
+    def generate_graph_signals(self, K: int, sigma: float=0.5) -> np.ndarray:
         """
-        self.Wを隣接行列に持つグラフ上で滑らかなグラフ信号をK個生成
+        Generate K smooth graph signals on a graph with self.W as its adjacency matrix
 
         Parameters
         ----------
         K : int
-            グラフ信号の数
-        sigma : ガウシアンノイズの標準偏差
+            Number of graph signals
+        sigma : float
+            Standard deviation of Gaussian noise
 
         Returns
         -------
         np.ndarray
-            K個のグラフ信号からなるデータ行列；行列の形は(N, K) (N: 頂点数)
+            Data matrix consisting of K graph signals; matrix shape is (N, K) (N: number of vertices)
         """
         d_vec = np.sum(self.W, axis=0)
         D = np.diag(d_vec)

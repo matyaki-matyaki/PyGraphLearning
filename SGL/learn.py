@@ -1,40 +1,40 @@
 import numpy as np
-from scipy import sparse, spatial, linalg
+from scipy import sparse, spatial
 
-def calc_z(X: np.ndarray) -> np.ndarray:
+def _calc_z(X: np.ndarray) -> np.ndarray:
     """
-    データ行列Xのpair-wise distances matrix Z のupper-right成分を集めたベクトルを計算する
+    Calculate the vector of the upper-right elements of the pair-wise distances matrix Z of the data matrix X
 
     Parameters
     ----------
     X : np.ndarray
-        K個のグラフ信号からなるデータ行列；行列の形は(N, K) (N: 頂点数)
+        Data matrix consisting of K graph signals; the shape of the matrix is (N, K) (N: number of vertices)
 
     Returns
     -------
     np.ndarray
-        N(N-1)/2次元のベクトルz
+        A vector of dimension N(N-1)/2
     """
     z = spatial.distance.pdist(X, 'sqeuclidean')
     z /= np.max(z)
     return z
 
-def create_S(N: int) -> sparse.csr_array:
+def _create_S(N: int) -> sparse.csr_array:
     """
-    \bm{S}\bm{w} = \bm{d}を満たす行列\bm{S}の作成
-    ここで，
-    - \bm{w}: 隣接行列\bm{W}のupper-rightの成分を集めたN(N-1)/2次元ベクトル
-    - \bm{d}: 隣接行列\bm{W}を持つグラフの次数を集めたN次元ベクトル
+    Create the matrix \bm{S} that satisfies \bm{S}\bm{w} = \bm{d}
+    Here,
+    - \bm{w}: A N(N-1)/2-dimensional vector composed of the upper-right elements of the adjacency matrix \bm{W}
+    - \bm{d}: N-dimensional vector of degrees of the graph with adjacency matrix \bm{W}
     
     Parameters
     ----------
     N : int
-        頂点数
+        Number of vertices
 
     Returns
     -------
     sparse.csr_array
-        sparse.csr_array形式の行列S
+        Matrix S in sparse.csr_array format
     """
     row_indices = np.repeat(np.arange(N), (N - 1))
     col_indices = np.arange(N * (N - 1))
@@ -49,41 +49,43 @@ def create_S(N: int) -> sparse.csr_array:
     return S
 
 
-def PDS_sgl(z: np.ndarray, A: sparse.csr_matrix, alpha: float, beta: float, gamma: float, maxit: int, epsilon: float) -> np.ndarray:
+def _PDS_sgl(z: np.ndarray, A: sparse.csr_array, alpha: float, beta: float, gamma: float, maxit: int, epsilon: float) -> np.ndarray:
     """
-    SGLの最適化問題を解くためのPDS（主双対近接分離法）
+    Primal Dual Splitting (PDS) method for solving the optimization problem of SGL
     PDS can solve: min. f(\bm{x}) + g(\bm{A}\bm{x}) + h(\bm{x}),
-    where f, g and h are proper, convex lower-semicontinuous functions,
-    and h is a differentiable function having a Lipschitzian gradient with a Lipschitz constant L    
+    where f, g, and h are proper, convex lower-semicontinuous functions,
+    and h is a differentiable function having a Lipschitzian gradient with a Lipschitz constant L
+    Here, we solve the following problem:
+    min. 2\bm{x}^\top\bm{z} + I_{x\geq 0}(x) - \alpha\log(\bm{A}\bm{x}) + 2\beta\|\bm{x}\|^2
 
     Parameters
     ----------
     z : np.ndarray
-        データ行列Xのpair-wise distances matrix Z のupper-right成分を集めたベクトル
-    A : sparse.csr_matrix
-        行列A
+        Vector composed of the upper-right elements of the pair-wise distances matrix Z of the data matrix
+    A : sparse.csr_array
+        Matrix A
     alpha : float
-        最適化問題のハイパーパラメータ
+        Hyperparameter for the optimization problem
     beta : float
-        最適化問題のハイパーパラメータ
+        Hyperparameter for the optimization problem
     gamma : float
-        ステップサイズ
+        Step size
     maxit : int
-        反復法の最大反復数
+        Maximum number of iterations for the iterative method
     epsilon : float
-        停止条件用の閾値
+        Threshold for the stopping condition
 
     Returns
     -------
     np.ndarray
-        最適解（推定された隣接行列；ベクトル形式）
+        The optimal solution (estimated adjacency matrix in vector form)
     """
-
-    
+        
     # init
     x = np.zeros(z.shape)
     v = A.dot(x)
     
+    # def prox.
     prox_f = lambda x_f, gamma_: np.maximum(x_f - 2 * gamma_ * z, 0.)
     prox_g = lambda v_g, gamma_: (v_g + np.sqrt(np.square(v_g) + 4 * alpha * gamma_)) / 2
     prox_g_ast = lambda v_g_ast, gamma_: v_g_ast - gamma_ * prox_g(v_g_ast / gamma_, 1 / gamma_)
@@ -93,20 +95,20 @@ def PDS_sgl(z: np.ndarray, A: sparse.csr_matrix, alpha: float, beta: float, gamm
     
     for _ in range(maxit):
         # Forward steps (in both primal and dual spaces)
-        y_1 = x - gamma * (nabla_h(x) + At.dot(v))
-        y_2 = v + gamma * A.dot(x)
+        y1 = x - gamma * (nabla_h(x) + At.dot(v))
+        y2 = v + gamma * A.dot(x)
         
         # Backward steps (in both primal and dual spaces)
-        p_1 = prox_f(y_1, gamma)
-        p_2 = prox_g_ast(y_2, gamma)
+        p1 = prox_f(y1, gamma)
+        p2 = prox_g_ast(y2, gamma)
         
         # Forward steps (in both primal and dual spaces)
-        q_1 = p_1 - gamma * (nabla_h(p_1) + At.dot(p_2))
-        q_2 = p_2 + gamma * A.dot(p_1)
+        q1 = p1 - gamma * (nabla_h(p1) + At.dot(p2))
+        q2 = p2 + gamma * A.dot(p1)
         
         # check stop condition
-        new_x = x - y_1 + q_1
-        new_v = v - y_2 + q_2        
+        new_x = x - y1 + q1
+        new_v = v - y2 + q2        
         div = max(1e-4, np.linalg.norm(x))
         gap = np.linalg.norm(new_x - x)
         if gap / div < epsilon:
@@ -119,69 +121,63 @@ def PDS_sgl(z: np.ndarray, A: sparse.csr_matrix, alpha: float, beta: float, gamm
     return x
     
 
-def vec2matrix(vec: np.ndarray, N: int) -> np.ndarray:
+def _vec2matrix(vec: np.ndarray, N: int) -> np.ndarray:
     """
-    ベクトル形式の隣接行列を行列形式に変換
+    Convert a vector-form adjacency matrix into matrix form
 
     Parameters
     ----------
     vec : np.ndarray
-        ベクトル形式の隣接行列
+        Vector-form adjacency matrix
     N : int
-        頂点数
+        Number of vertices
 
     Returns
     -------
     np.ndarray
-        隣接行列
+        Adjacency matrix
     """
-    indices = np.triu_indices(N, 1)
-    mat = np.empty((N, N))
-    mat[indices[0], indices[1]] = vec
-    mat = mat + mat.transpose()
-    return mat
+    matrix = np.empty((N, N))
+    matrix = spatial.distance.squareform(vec)
+
+    return matrix
 
 
 def sgl(X: np.ndarray, alpha: float=1., beta: float=1e-2, step: float=0.5, maxit: int=10000, epsilon: float=1e-5) -> np.ndarray:
     """
-    静的グラフ学習の実行
+    Execution of static graph learning
 
     Parameters
     ----------
     X : np.ndarray
-        K個のグラフ信号からなるデータ行列；行列の形は(N, K) (N: 頂点数)
+        Data matrix consisting of K graph signals; the shape of the matrix is (N, K) (N: number of vertices)
     alpha : float, optional
-        ハイパーパラメータ（結果となるグラフの辺重みのスケールを調整するパラメータであるので調整不要）, by default 1.
+        Hyperparameter (adjusting the scale of edge weights of the resulting graph, so no adjustment needed), by default 1.
     beta : float, optional
-        ハイパーパラメータ, by default 1e-2
+        Hyperparameter, by default 1e-2
     step : float, optional
-        ステップサイズ（収束は保証されるので，調整不要）, by default 0.5
+        Step size (convergence is guaranteed, so no adjustment needed), by default 0.5
     maxit : int, optional
-        反復法の最大反復数, by default 10000
+        Maximum number of iterations for the iterative method, by default 10000
     epsilon : float, optional
-        停止条件用の閾値, by default 1e-5
+        Threshold for the stopping condition, by default 1e-5
 
     Returns
     -------
     np.ndarray
-        推定された隣接行列
+        Estimated adjacency matrix
     """
-    z = calc_z(X)
-    S = create_S(X.shape[0])
-    # リプシッツ定数
+    z = _calc_z(X)
+    S = _create_S(X.shape[0])
+    # Lipschitz constant
     lip_const = 4 * beta
-    # Sのスペクトラルノルム
+    # Spectral norm of S
     spec_norm_S = np.sqrt(2 * (X.shape[0] - 1))
-    # PDSで使用するステップサイズ
+    # Step size for use in PDS
     gamma = step / (1 + lip_const + spec_norm_S)
-    # 最適化問題を解く
-    w = PDS_sgl(z, S, alpha, beta, gamma, maxit, epsilon)
-    # ベクトル形式の隣接行列を行列形式に変換
-    W = vec2matrix(w, X.shape[0])
+    # Solve the optimization problem
+    w = _PDS_sgl(z, S, alpha, beta, gamma, maxit, epsilon)
+    # Convert vector-form adjacency matrix to matrix form
+    W = _vec2matrix(w, X.shape[0])
     
     return W
-    
-    
-    
-
-    
