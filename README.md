@@ -5,8 +5,8 @@ This repository contains Python implementations for graph learning methods, whic
 ## Installation
 
 ```
-git clone https://github.com/matyaki-matyaki/PYGL
-cd PYGL
+git clone https://github.com/matyaki-matyaki/PyGraphLearning
+cd PyGraphLearning
 pip install -r requirements.txt
 ```
 
