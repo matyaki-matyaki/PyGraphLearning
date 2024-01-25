@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
+import sys
+sys.path.append('../')
 import warnings
 warnings.simplefilter('ignore')
 
-from learn import tvgl
-# To generate the ground-truth weighted adjacency matrix
-from timevarying_graph import TimevaryingErdosRenyiGraph
+from pygl.graph_learning import GraphLearning
+from pygl.utils_tvgl.toy_graph import TimevaryingErdosRenyiGraph
 
 N = 40 # number of nodes
 K = 100000 # number of data observed at each node
@@ -14,7 +15,7 @@ G = TimevaryingErdosRenyiGraph(N, T) # ground-truth graph (random graph)
 X = G.generate_graph_signals_eachtime(K) # observed data matrix
 
 # conduct static graph learning
-W = tvgl(X, eta=1)
+W = GraphLearning(graph_type='time-varying', eta=1.).fit_transform(X)
 
 # Displaying the images side by side
 plt.figure(figsize=(12, 6))

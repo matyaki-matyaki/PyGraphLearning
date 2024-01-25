@@ -26,7 +26,7 @@ For usage examples, please refer to the example.py file in this repository.
 To run the example of SGL, execute the following command:
 
 ```
-python SGL/example.py
+python examples/example_sgl.py
 ```
 
 The hyperparameters for SGL are $\alpha$ and $\beta$. 
@@ -50,7 +50,7 @@ Below is an example of the output you can expect after running SGL/example.py:
 To run the example of TVGL, execute the following command:
 
 ```
-python TVGL/example.py
+python examples/example_tvgl.py
 ```
 
 The hyperparameters for TVGL are $\alpha$, $\beta$, and $\eta$, where the effects of $\alpha$ and $\beta$ are the same as in SGL. $\eta$ is a parameter that weighs the changes in the graph's structure. When $\eta$ is large, a time-invariant graph is obtained, and when $\eta$=0, the results are equivalent to performing SGL independently at each time point.

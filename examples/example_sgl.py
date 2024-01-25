@@ -1,17 +1,19 @@
 import matplotlib.pyplot as plt
+import sys
+sys.path.append('../')
 
-from learn import sgl
-# To generate the ground-truth weighted adjacency matrix
-from static_graph import StaticErdosRenyiGraph
+from pygl.graph_learning import GraphLearning
+from pygl.utils_sgl.toy_graph import StaticErdosRenyiGraph
 
 N = 100 # number of nodes
 K = 1000 # number of data observed at each node
 
+# To generate the ground-truth weighted adjacency matrix
 G = StaticErdosRenyiGraph(N) # ground-truth graph (random graph)
 X = G.generate_graph_signals(K) # observed data matrix
 
 # conduct static graph learning
-W = sgl(X, beta=1e-3)
+W = GraphLearning(beta=1e-3).fit_transform(X)
 
 # Displaying the images side by side
 plt.figure(figsize=(12, 6))

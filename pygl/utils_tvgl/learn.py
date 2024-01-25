@@ -75,7 +75,7 @@ def _create_S_and_P(N: int, T: int) -> tuple[sparse.csr_array, sparse.csr_array]
     return S, P
 
 
-def _PDS_tvgl(z: np.ndarray, S: sparse.csr_array, P: sparse.csr_array, alpha: float, beta: float, eta: float, gamma: float, maxit: int, epsilon: float) -> np.ndarray:
+def _PDS_tvgl(z: np.ndarray, S: sparse.csr_array, P: sparse.csr_array, alpha: float, beta: float, eta: float, gamma: float, max_iter: int, epsilon: float) -> np.ndarray:
     """
     PDS for solving the optimization problem of TVGL
 
@@ -95,7 +95,7 @@ def _PDS_tvgl(z: np.ndarray, S: sparse.csr_array, P: sparse.csr_array, alpha: fl
         Hyperparameter for the optimization problem
     gamma : float
         Step size
-    maxit : int
+    max_iter : int
         Maximum number of iterations
     epsilon : float
         Threshold for the stopping condition
@@ -122,7 +122,7 @@ def _PDS_tvgl(z: np.ndarray, S: sparse.csr_array, P: sparse.csr_array, alpha: fl
     St = S.transpose()
     Pt = P.transpose()
     
-    for _ in range(maxit):
+    for _ in range(max_iter):
         # Forward steps (in both primal and dual spaces)
         y0 = x - gamma * (nabla_h(x) + St.dot(v1) + Pt.dot(v2))
         y1 = v1 + gamma * S.dot(x)
@@ -181,7 +181,7 @@ def _vec2matrix(vec: np.ndarray, N: int, T: int) -> np.ndarray:
     return matrices
 
 
-def tvgl(X: np.ndarray, alpha: float=1., beta: float=1e-2, eta: float=2.0, step: float=0.5, maxit: int=10000, epsilon: float=1e-5) -> np.ndarray:
+def tvgl(X: np.ndarray, alpha: float = 1., beta: float = 1e-2, eta: float = 2.0, step: float = 0.5, max_iter: int = 10000, epsilon: float = 1e-5) -> np.ndarray:
     """
     Execution of time-varying graph learning
 
@@ -197,7 +197,7 @@ def tvgl(X: np.ndarray, alpha: float=1., beta: float=1e-2, eta: float=2.0, step:
         Hyperparameter, by default 2.0
     step : float, optional
         Step size (convergence is guaranteed, so no adjustment needed), by default 0.5
-    maxit : int, optional
+    max_iter : int, optional
         Maximum number of iterations, by default 10000
     epsilon : float, optional
         Threshold for the stopping condition, by default 1e-5
@@ -218,7 +218,7 @@ def tvgl(X: np.ndarray, alpha: float=1., beta: float=1e-2, eta: float=2.0, step:
     # Step size for use in PDS
     gamma = step / (1 + lip_const + spec_norm_A)
     # Solve the optimization problem
-    w = _PDS_tvgl(z, S, P, alpha, beta, eta, gamma, maxit, epsilon)
+    w = _PDS_tvgl(z, S, P, alpha, beta, eta, gamma, max_iter, epsilon)
     # Convert the vector-form adjacency matrix columns to matrix form
     W = _vec2matrix(w, N, T)
 

@@ -49,7 +49,7 @@ def _create_S(N: int) -> sparse.csr_array:
     return S
 
 
-def _PDS_sgl(z: np.ndarray, A: sparse.csr_array, alpha: float, beta: float, gamma: float, maxit: int, epsilon: float) -> np.ndarray:
+def _PDS_sgl(z: np.ndarray, A: sparse.csr_array, alpha: float, beta: float, gamma: float, max_iter: int, epsilon: float) -> np.ndarray:
     """
     Primal Dual Splitting (PDS) method for solving the optimization problem of SGL
     PDS can solve: min. f(\bm{x}) + g(\bm{A}\bm{x}) + h(\bm{x}),
@@ -70,7 +70,7 @@ def _PDS_sgl(z: np.ndarray, A: sparse.csr_array, alpha: float, beta: float, gamm
         Hyperparameter for the optimization problem
     gamma : float
         Step size
-    maxit : int
+    max_iter : int
         Maximum number of iterations for the iterative method
     epsilon : float
         Threshold for the stopping condition
@@ -93,7 +93,7 @@ def _PDS_sgl(z: np.ndarray, A: sparse.csr_array, alpha: float, beta: float, gamm
     
     At = A.transpose()
     
-    for _ in range(maxit):
+    for _ in range(max_iter):
         # Forward steps (in both primal and dual spaces)
         y1 = x - gamma * (nabla_h(x) + At.dot(v))
         y2 = v + gamma * A.dot(x)
@@ -143,7 +143,7 @@ def _vec2matrix(vec: np.ndarray, N: int) -> np.ndarray:
     return matrix
 
 
-def sgl(X: np.ndarray, alpha: float=1., beta: float=1e-2, step: float=0.5, maxit: int=10000, epsilon: float=1e-5) -> np.ndarray:
+def sgl(X: np.ndarray, alpha: float = 1., beta: float = 1e-2, step: float = 0.5, max_iter: int = 10000, epsilon: float = 1e-5) -> np.ndarray:
     """
     Execution of static graph learning
 
@@ -157,7 +157,7 @@ def sgl(X: np.ndarray, alpha: float=1., beta: float=1e-2, step: float=0.5, maxit
         Hyperparameter, by default 1e-2
     step : float, optional
         Step size (convergence is guaranteed, so no adjustment needed), by default 0.5
-    maxit : int, optional
+    max_iter : int, optional
         Maximum number of iterations for the iterative method, by default 10000
     epsilon : float, optional
         Threshold for the stopping condition, by default 1e-5
@@ -176,7 +176,7 @@ def sgl(X: np.ndarray, alpha: float=1., beta: float=1e-2, step: float=0.5, maxit
     # Step size for use in PDS
     gamma = step / (1 + lip_const + spec_norm_S)
     # Solve the optimization problem
-    w = _PDS_sgl(z, S, alpha, beta, gamma, maxit, epsilon)
+    w = _PDS_sgl(z, S, alpha, beta, gamma, max_iter, epsilon)
     # Convert vector-form adjacency matrix to matrix form
     W = _vec2matrix(w, X.shape[0])
     

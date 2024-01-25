@@ -78,3 +78,19 @@ class StaticErdosRenyiGraph(StaticGraph):
         X = self.random_state.multivariate_normal(np.zeros(self.N), cov, size=K).transpose()
         return X
             
+
+class TimevaryingGraph:
+    """
+    時変グラフのクラス
+    
+    Attributes
+    ----------
+    N: int
+        頂点数
+    T: int
+        観測時刻数
+    """
+    def __init__(self, N, T):
+        self.N = N
+        self.T = T
+        self.W = np.empty((T, N, N))
