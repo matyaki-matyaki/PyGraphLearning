@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-For usage examples, please refer to the example.py file in this repository.
+For usage examples, please refer to the example directory in this repository.
 
 ### SGL
 
