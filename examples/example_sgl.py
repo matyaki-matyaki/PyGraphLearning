@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
-import sys
-sys.path.append('../')
 
 from pygl.graph_learning import GraphLearning
-from pygl.utils_sgl.toy_graph import StaticErdosRenyiGraph
+from pygl.utils_sgl.toy_graph_static import StaticErdosRenyiGraph
 
 N = 100 # number of nodes
 K = 1000 # number of data observed at each node

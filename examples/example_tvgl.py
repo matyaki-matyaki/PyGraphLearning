@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
-import sys
-sys.path.append('../')
 import warnings
 warnings.simplefilter('ignore')
 
 from pygl.graph_learning import GraphLearning
-from pygl.utils_tvgl.toy_graph import TimevaryingErdosRenyiGraph
+from pygl.utils_tvgl.toy_graph_timevarying import TimevaryingErdosRenyiGraph
 
 N = 40 # number of nodes
 K = 100000 # number of data observed at each node

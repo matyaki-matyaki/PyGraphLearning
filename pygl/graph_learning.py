@@ -1,8 +1,8 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from .utils_sgl.learn import sgl
-from .utils_tvgl.learn import tvgl
+from .utils_sgl import sgl
+from .utils_tvgl import tvgl
 
 class GraphLearning(BaseEstimator, TransformerMixin):
     """
