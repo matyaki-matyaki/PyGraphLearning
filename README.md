@@ -1,6 +1,6 @@
 # Static and Time-Varying Graph Learning by Python
 
-This repository contains Python implementations for graph learning methods, which are used to estimate the underlying graph structure (weighted adjacency matrix) using data observed at each vertex. In Static Graph Learning (SGL), it is possible to infer the structure of graphs that do not change over time. In Time-Varying Graph Learning (TVGL), the methods allow for the estimation of graph structures that change over time.
+PyGraphLearning is a Python machine learning package based on scikit-learn API. This repository contains Python implementations for graph learning methods, which are used to estimate the underlying graph structure (weighted adjacency matrix) using data observed at each vertex. In Static Graph Learning (SGL), it is possible to infer the structure of graphs that do not change over time. In Time-Varying Graph Learning (TVGL), the methods allow for the estimation of graph structures that change over time.
 
 ## Installation
 
