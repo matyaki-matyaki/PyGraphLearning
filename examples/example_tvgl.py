@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.simplefilter('ignore')
 
-from pygl.graph_learning import GraphLearning
-from pygl.utils_tvgl.toy_graph_timevarying import TimevaryingErdosRenyiGraph
+from graph_learning.graph_learn import GraphLearning
+from graph_learning.utils_tvgl.toy_graph_timevarying import TimevaryingErdosRenyiGraph
 
 N = 40 # number of nodes
 K = 100000 # number of data observed at each node
