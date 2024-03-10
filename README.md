@@ -5,9 +5,7 @@ PyGraphLearning is a Python machine learning package based on scikit-learn API. 
 ## Installation
 
 ```
-git clone https://github.com/matyaki-matyaki/PyGraphLearning
-cd PyGraphLearning
-pip install -r requirements.txt
+pip install git+https://github.com/matyaki-matyaki/PyGraphLearning
 ```
 
 ## Usage
