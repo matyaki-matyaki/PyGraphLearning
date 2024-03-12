@@ -391,6 +391,23 @@ extra = ["lxml (>=4.6)", "pydot (>=1.4.2)", "pygraphviz (>=1.11)", "sympy (>=1.1
 test = ["pytest (>=7.2)", "pytest-cov (>=4.0)"]
 
 [[package]]
+name = "networkx-stubs"
+version = "0.0.1"
+description = "Typing stubs for NetworkX"
+optional = false
+python-versions = "*"
+files = [
+    {file = "networkx-stubs-0.0.1.tar.gz", hash = "sha256:1751cbc87898328f89d79476ec6363174c05f9e48592f0953cc1077188717a21"},
+    {file = "networkx_stubs-0.0.1-py3-none-any.whl", hash = "sha256:ce58dff9b9dcbfdf895d0fce20fa8a73f2e82e581004596b7552086b5bb91366"},
+]
+
+[package.dependencies]
+networkx = "*"
+
+[package.extras]
+dev = ["black", "flake8", "flake8-black", "flake8-pyi", "mypy", "setuptools", "wheel"]
+
+[[package]]
 name = "numpy"
 version = "1.26.4"
 description = "Fundamental package for array computing in Python"
@@ -679,4 +696,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c74df44492c22cb4925b6c7b1b182a9feb6d44b41f18c9895677b2bd0d026df1"
+content-hash = "e5d77b22c62d30fec73d6e0b0ba02cc6eded5a66c6075e92541f1f547ea66768"
