@@ -273,3 +273,25 @@ def tvgl(
     W = _vec2matrix(w, N, T)
 
     return W
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    from time_varying_graph_model import TimevaryingErdosRenyiGraph
+    time_varying_graph = TimevaryingErdosRenyiGraph(N=36, T=200)
+    X = time_varying_graph.generate_graph_signals_eachtime(K=100, sigma=0.25)
+    W_pred = tvgl(X, beta=1e-4, eta=0.2)
+
+    plt.figure(figsize=(12, 6))
+    for i in range(5):
+        plt.subplot(2, 5, i+1)
+        plt.imshow(time_varying_graph.W[i])
+        plt.title(f'W_gt[{i}]')
+        plt.axis('off')
+        plt.subplot(2, 5, i + 6)
+        plt.imshow(W_pred[i])
+        plt.title(f'W_pred[{i}]')
+        plt.axis('off')
+    plt.suptitle('Result (Time Varying Graph Learning)')
+    plt.tight_layout(pad=3.0)
+    plt.savefig('tmp.png')

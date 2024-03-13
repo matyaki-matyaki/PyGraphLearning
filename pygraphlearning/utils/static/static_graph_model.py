@@ -11,9 +11,9 @@ class StaticGraph:
     N: int
         Number of vertices
     """
-    def __init__(self, N):
+    def __init__(self, N: int) -> None:
         self.N = N
-        self.W = np.empty((N, N))
+        self.W = np.empty((N, N), dtype=float)
 
 
 class StaticErdosRenyiGraph(StaticGraph):
@@ -33,7 +33,12 @@ class StaticErdosRenyiGraph(StaticGraph):
     W : np.ndarray
         Adjacency matrix in mathbb{R}^{N x N}
     """
-    def __init__(self, N, p=0.05, seed=42):
+    def __init__(
+        self,
+        N: int,
+        p: float = 0.05,
+        seed: int = 42
+    ) -> None:
         super().__init__(N)
         self.p = p
         self.seed = seed
@@ -81,5 +86,26 @@ class StaticErdosRenyiGraph(StaticGraph):
         X = self.random_state.multivariate_normal(
             np.zeros(self.N),
             cov,
-            size=K).transpose()
+            size=K
+            ).transpose()
         return X
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    static_graph = StaticErdosRenyiGraph(N=36, p=0.1)
+
+    # weighted adjacancy matrix
+    plt.imshow(static_graph.W)
+    plt.colorbar()
+    plt.title('W')
+    plt.savefig('tmp_0.png')
+    plt.close()
+
+    # graph signals
+    X = static_graph.generate_graph_signals(K=100, sigma=0.1)
+    plt.imshow(X)
+    plt.colorbar()
+    plt.title('graph signals')
+    plt.savefig('tmp_1.png')
+    plt.close()

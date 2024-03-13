@@ -217,3 +217,22 @@ def sgl(
     W = _vec2matrix(w, X.shape[0])
 
     return W
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    from static_graph_model import StaticErdosRenyiGraph
+
+    static_graph = StaticErdosRenyiGraph(N=36, p=0.05)
+    X = static_graph.generate_graph_signals(K=100, sigma=0.25)
+    W_pred = sgl(X, beta=1e-4)
+
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.imshow(static_graph.W)
+    plt.title('Ground Truth')
+    plt.subplot(1, 2, 2)
+    plt.imshow(W_pred)
+    plt.title('Estimated')
+    plt.suptitle('Result (Static Graph Learning)')
+    plt.savefig('tmp.png')

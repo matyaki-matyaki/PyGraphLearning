@@ -27,5 +27,8 @@ build-backend = "poetry.core.masonry.api"
 
 
 [[tool.mypy.overrides]]
-module = "scipy"
+module = [
+    "scipy",
+    "pygraphlearning.*"
+]
 ignore_missing_imports = true

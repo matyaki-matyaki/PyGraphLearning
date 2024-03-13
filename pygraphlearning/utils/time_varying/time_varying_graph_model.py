@@ -118,3 +118,24 @@ class TimevaryingErdosRenyiGraph(TimevaryingGraph):
                 size=K).transpose()
             X[t] = X_t
         return X
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    time_varying_graph = TimevaryingErdosRenyiGraph(N=36, T=200, p_init=0.1)
+
+    # weighted adjacancy matrices
+    plt.figure(figsize=(10, 5))
+    for i in range(5):
+        plt.subplot(2, 5, i+1)
+        plt.imshow(time_varying_graph.W[i])
+        plt.title(f't = {i}')
+        plt.axis('off')
+        if i > 0:
+            plt.subplot(2, 5, i + 6)
+            plt.imshow(time_varying_graph.W[i] - time_varying_graph.W[i-1])
+            plt.title(f'W[t={i}] - W[t={i-1}]')
+            plt.axis('off')
+    plt.suptitle('Weighted Adjacency Matrices')
+    plt.tight_layout()
+    plt.savefig('tmp.png')
