@@ -161,3 +161,5 @@ cython_debug/
 
 # tmp files
 tmp*
+.vscode
+.python-version
