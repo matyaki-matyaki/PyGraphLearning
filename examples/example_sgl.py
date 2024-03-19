@@ -1,29 +1,34 @@
 import matplotlib.pyplot as plt
+from pathlib import Path
 
-from graph_learning.graph_learn import GraphLearning
-from graph_learning.utils_sgl.toy_graph_static import StaticErdosRenyiGraph
+from pygraphlearning.graph_learning import GraphLearning
+from pygraphlearning.utils.static.static_graph_model \
+    import StaticErdosRenyiGraph
 
-N = 100 # number of nodes
-K = 1000 # number of data observed at each node
+# produce ground-truth graph and graph signals
+static_graph = StaticErdosRenyiGraph(N=36, p=0.05)
+X = static_graph.generate_graph_signals(K=100, sigma=0.25)
+print(f'{static_graph.W.shape=}, {X.shape=}')
+# static_graph.W.shape=(36, 36), X.shape=(36, 100)
 
-# To generate the ground-truth weighted adjacency matrix
-G = StaticErdosRenyiGraph(N) # ground-truth graph (random graph)
-X = G.generate_graph_signals(K) # observed data matrix
+# produce GraphLearning instance
+gl = GraphLearning(
+    graph_type='static',
+    beta=1e-4
+)
 
-# conduct static graph learning
-W = GraphLearning(beta=1e-3).fit_transform(X)
+# learn static graph
+W_pred = gl.fit_transform(X)
 
-# Displaying the images side by side
+# show result
 plt.figure(figsize=(12, 6))
-
-# Displaying G.W
 plt.subplot(1, 2, 1)
-plt.imshow(G.W)
-plt.title("Ground-truth")
-
-# Displaying W
+plt.imshow(static_graph.W)
+plt.title('Ground Truth')
+plt.axis('off')
 plt.subplot(1, 2, 2)
-plt.imshow(W)
-plt.title("Estimated")
-
-plt.show()
+plt.imshow(W_pred)
+plt.title('Estimated')
+plt.axis('off')
+plt.suptitle('Result (Static Graph Learning)')
+plt.savefig(Path('examples', 'out', 'result_sgl.png'))

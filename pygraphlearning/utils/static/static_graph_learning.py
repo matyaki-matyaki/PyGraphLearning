@@ -1,14 +1,17 @@
 import numpy as np
 from scipy import sparse, spatial
 
+
 def _calc_z(X: np.ndarray) -> np.ndarray:
     """
-    Calculate the vector of the upper-right elements of the pair-wise distances matrix Z of the data matrix X
+    Calculate the vector of the upper-right elements of the pair-wise
+    distances matrix Z of the data matrix X
 
     Parameters
     ----------
     X : np.ndarray
-        Data matrix consisting of K graph signals; the shape of the matrix is (N, K) (N: number of vertices)
+        Data matrix consisting of K graph signals; the shape of the matrix is
+        (N, K) (N: number of vertices)
 
     Returns
     -------
@@ -19,13 +22,16 @@ def _calc_z(X: np.ndarray) -> np.ndarray:
     z /= np.max(z)
     return z
 
+
 def _create_S(N: int) -> sparse.csr_array:
     """
     Create the matrix \bm{S} that satisfies \bm{S}\bm{w} = \bm{d}
     Here,
-    - \bm{w}: A N(N-1)/2-dimensional vector composed of the upper-right elements of the adjacency matrix \bm{W}
-    - \bm{d}: N-dimensional vector of degrees of the graph with adjacency matrix \bm{W}
-    
+    - \bm{w}: A N(N-1)/2-dimensional vector composed of the upper-right
+                elements of the adjacency matrix \bm{W}
+    - \bm{d}: N-dimensional vector of degrees of the graph with
+                adjacency matrix \bm{W}
+
     Parameters
     ----------
     N : int
@@ -40,28 +46,41 @@ def _create_S(N: int) -> sparse.csr_array:
     col_indices = np.arange(N * (N - 1))
     tmp_array = np.arange(N - 1)
     for i in range(N - 1):
-        tmp_array[i + 1 :] += N - 2 - i
+        tmp_array[i + 1:] += N - 2 - i
         tmp_array[:i] += 1
-        col_indices[(N - 1) * (i + 1) : (N - 1) * (i + 2)] = tmp_array
-    data = np.ones(N * (N - 1), dtype = np.float64)
-    S = sparse.csr_array((data, (row_indices, col_indices)), shape = (N, N*(N - 1) // 2))
-    
+        col_indices[(N - 1) * (i + 1): (N - 1) * (i + 2)] = tmp_array
+    data = np.ones(N * (N - 1), dtype=np.float64)
+    S = sparse.csr_array(
+        (data, (row_indices, col_indices)),
+        shape=(N, N * (N - 1) // 2))
+
     return S
 
 
-def _PDS_sgl(z: np.ndarray, A: sparse.csr_array, alpha: float, beta: float, gamma: float, max_iter: int, epsilon: float) -> np.ndarray:
+def _PDS_sgl(
+    z: np.ndarray,
+    A: sparse.csr_array,
+    alpha: float,
+    beta: float,
+    gamma: float,
+    max_iter: int,
+    epsilon: float
+) -> np.ndarray:
     """
-    Primal Dual Splitting (PDS) method for solving the optimization problem of SGL
-    PDS can solve: min. f(\bm{x}) + g(\bm{A}\bm{x}) + h(\bm{x}),
+    Primal Dual Splitting (PDS) method for solving the optimization problem
+    of SGL.
+    PDS can solve: min. f(x) + g(Ax) + h(x),
     where f, g, and h are proper, convex lower-semicontinuous functions,
-    and h is a differentiable function having a Lipschitzian gradient with a Lipschitz constant L
+    and h is a differentiable function having a Lipschitzian gradient
+    with a Lipschitz constant L.
     Here, we solve the following problem:
-    min. 2\bm{x}^\top\bm{z} + I_{x\geq 0}(x) - \alpha\log(\bm{A}\bm{x}) + 2\beta\|\bm{x}\|^2
+    min. 2x^T z + I_{x>=0}(x) - alpha log(Ax) + 2 beta ||x||^2
 
     Parameters
     ----------
     z : np.ndarray
-        Vector composed of the upper-right elements of the pair-wise distances matrix Z of the data matrix
+        Vector composed of the upper-right elements of the pair-wise distances
+        matrix Z of the data matrix
     A : sparse.csr_array
         Matrix A
     alpha : float
@@ -80,46 +99,53 @@ def _PDS_sgl(z: np.ndarray, A: sparse.csr_array, alpha: float, beta: float, gamm
     np.ndarray
         The optimal solution (estimated adjacency matrix in vector form)
     """
-        
+
     # init
-    x = np.zeros(z.shape)
+    x = np.zeros(z.shape, dtype=float)
     v = A.dot(x)
-    
+
     # def prox.
-    prox_f = lambda x_f, gamma_: np.maximum(x_f - 2 * gamma_ * z, 0.)
-    prox_g = lambda v_g, gamma_: (v_g + np.sqrt(np.square(v_g) + 4 * alpha * gamma_)) / 2
-    prox_g_ast = lambda v_g_ast, gamma_: v_g_ast - gamma_ * prox_g(v_g_ast / gamma_, 1 / gamma_)
-    nabla_h = lambda x_h: 4 * beta * x_h
-    
+    def prox_f(x_f, gamma_):
+        return np.maximum(x_f - 2 * gamma_ * z, 0.)
+
+    def prox_g(v_g, gamma_):
+        return (v_g + np.sqrt(np.square(v_g) + 4 * alpha * gamma_)) / 2
+
+    def prox_g_ast(v_g_ast, gamma_):
+        return v_g_ast - gamma_ * prox_g(v_g_ast / gamma_, 1 / gamma_)
+
+    def nabla_h(x_h):
+        return 4 * beta * x_h
+
     At = A.transpose()
-    
+
     for _ in range(max_iter):
         # Forward steps (in both primal and dual spaces)
         y1 = x - gamma * (nabla_h(x) + At.dot(v))
         y2 = v + gamma * A.dot(x)
-        
+
         # Backward steps (in both primal and dual spaces)
         p1 = prox_f(y1, gamma)
         p2 = prox_g_ast(y2, gamma)
-        
+
         # Forward steps (in both primal and dual spaces)
         q1 = p1 - gamma * (nabla_h(p1) + At.dot(p2))
         q2 = p2 + gamma * A.dot(p1)
-        
+
         # check stop condition
         new_x = x - y1 + q1
-        new_v = v - y2 + q2        
-        div = max(1e-4, np.linalg.norm(x))
+        new_v = v - y2 + q2
+        div = max(1e-4, float(np.linalg.norm(x)))
         gap = np.linalg.norm(new_x - x)
         if gap / div < epsilon:
             break
-        
+
         # Update solution (in both primal and dual spaces)
         x = new_x
         v = new_v
-    
+
     return x
-    
+
 
 def _vec2matrix(vec: np.ndarray, N: int) -> np.ndarray:
     """
@@ -143,20 +169,30 @@ def _vec2matrix(vec: np.ndarray, N: int) -> np.ndarray:
     return matrix
 
 
-def sgl(X: np.ndarray, alpha: float = 1., beta: float = 1e-2, step: float = 0.5, max_iter: int = 10000, epsilon: float = 1e-5) -> np.ndarray:
+def sgl(
+    X: np.ndarray,
+    alpha: float = 1.,
+    beta: float = 1e-2,
+    step: float = 0.5,
+    max_iter: int = 10000,
+    epsilon: float = 1e-5
+) -> np.ndarray:
     """
     Execution of static graph learning
 
     Parameters
     ----------
     X : np.ndarray
-        Data matrix consisting of K graph signals; the shape of the matrix is (N, K) (N: number of vertices)
+        Data matrix consisting of K graph signals; the shape of the matrix is
+        (N, K) (N: number of vertices)
     alpha : float, optional
-        Hyperparameter (adjusting the scale of edge weights of the resulting graph, so no adjustment needed), by default 1.
+        Hyperparameter (adjusting the scale of edge weights of the resulting
+        graph, so no adjustment needed), by default 1.
     beta : float, optional
         Hyperparameter, by default 1e-2
     step : float, optional
-        Step size (convergence is guaranteed, so no adjustment needed), by default 0.5
+        Step size (convergence is guaranteed, so no adjustment needed),
+        by default 0.5
     max_iter : int, optional
         Maximum number of iterations for the iterative method, by default 10000
     epsilon : float, optional
@@ -179,5 +215,25 @@ def sgl(X: np.ndarray, alpha: float = 1., beta: float = 1e-2, step: float = 0.5,
     w = _PDS_sgl(z, S, alpha, beta, gamma, max_iter, epsilon)
     # Convert vector-form adjacency matrix to matrix form
     W = _vec2matrix(w, X.shape[0])
-    
+
     return W
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    from pygraphlearning.utils.static.static_graph_model \
+        import StaticErdosRenyiGraph
+
+    static_graph = StaticErdosRenyiGraph(N=36, p=0.05)
+    X = static_graph.generate_graph_signals(K=100, sigma=0.25)
+    W_pred = sgl(X, beta=1e-4)
+
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.imshow(static_graph.W)
+    plt.title('Ground Truth')
+    plt.subplot(1, 2, 2)
+    plt.imshow(W_pred)
+    plt.title('Estimated')
+    plt.suptitle('Result (Static Graph Learning)')
+    plt.savefig('tmp.png')

@@ -34,7 +34,7 @@ $\alpha (>0)$ is a parameter that governs the overall scale of the adjacency mat
 
 Below is an example of the output you can expect after running SGL/example.py:
 
-<img src="https://drive.google.com/uc?=view&id=1j8KZiqc5hRLqPNYUQtP7ftfFphCeuwyW" width= 100%>
+![result_sgl](examples/out/result_sgl.png)
 
 ### TVGL
 
@@ -57,7 +57,7 @@ The hyperparameters for TVGL are $\alpha$, $\beta$, and $\eta$, where the effect
 
 Below is an example of the output you can expect after running TVGL/example.py:
 
-<img src="https://drive.google.com/uc?=view&id=1QbdWUrejyRWI2z8eZXIa3zU4nT4pOgBj" width= 100%>
+![result_tvgl](examples/out/result_tvgl.png)
 
 ## References
 This project is based on the following papers:
