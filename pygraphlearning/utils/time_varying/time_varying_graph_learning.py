@@ -277,7 +277,8 @@ def tvgl(
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    from time_varying_graph_model import TimevaryingErdosRenyiGraph
+    from pygraphlearning.utils.time_varying.time_varying_graph_model \
+        import TimevaryingErdosRenyiGraph
     time_varying_graph = TimevaryingErdosRenyiGraph(N=36, T=200)
     X = time_varying_graph.generate_graph_signals_eachtime(K=100, sigma=0.25)
     W_pred = tvgl(X, beta=1e-4, eta=0.2)

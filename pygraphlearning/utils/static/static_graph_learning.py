@@ -221,7 +221,8 @@ def sgl(
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    from static_graph_model import StaticErdosRenyiGraph
+    from pygraphlearning.utils.static.static_graph_model \
+        import StaticErdosRenyiGraph
 
     static_graph = StaticErdosRenyiGraph(N=36, p=0.05)
     X = static_graph.generate_graph_signals(K=100, sigma=0.25)
